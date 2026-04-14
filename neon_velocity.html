@@ -1,0 +1,557 @@
+yes <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonVelocity - Racing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0015 0%, #1a003d 100%);
+            color: #00ff88;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(10, 0, 21, 0.95);
+            border: 3px solid #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 15px;
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff88;
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #00ccff;
+        }
+
+        .status-board {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .lap-info {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #00ccff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 3px solid #00ff88;
+            padding: 10px 15px;
+            border-radius: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #00ccff;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #1a1a2e;
+            border: 1px solid #00ff88;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            transition: width 0.3s ease;
+        }
+
+        .position-display {
+            text-align: center;
+            font-size: 16px;
+            padding: 10px;
+            background: rgba(0, 51, 102, 0.3);
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .position-num {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffaa00;
+        }
+
+        .action-selection {
+            margin-bottom: 20px;
+        }
+
+        .action-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #00ccff;
+            text-transform: uppercase;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            border-radius: 6px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: #00ff88;
+            color: #0a0015;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-btn.push {
+            grid-column: 1;
+        }
+
+        .action-btn.maintain {
+            grid-column: 2;
+        }
+
+        .action-btn.conserve {
+            grid-column: 1;
+        }
+
+        .action-btn.pitstop {
+            grid-column: 2;
+        }
+
+        .message-box {
+            background: rgba(0, 51, 102, 0.4);
+            border: 1px solid #00ccff;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 50px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-item {
+            margin: 5px 0;
+        }
+
+        .event-warning {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+
+        .event-rain {
+            color: #00ccff;
+        }
+
+        .event-dnf {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .game-over {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-over h2 {
+            color: #ff0000;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .finish-line {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #ffaa00;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .finish-line h2 {
+            color: #ffaa00;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .podium {
+            color: #ffaa00;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00ff88, #00ccff);
+            border: none;
+            border-radius: 6px;
+            color: #0a0015;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .reset-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .warning {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+
+        .critical {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pulsing {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">🏎️ NEONVELOCITY</div>
+            <div class="subtitle">Racing Simulation</div>
+        </div>
+
+        <div id="gameContent">
+            <div class="status-board">
+                <div class="lap-info">--- VUELTA <span id="lapNumber">1</span>/<span id="totalLaps">10</span> ---</div>
+                
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div class="stat-label">Posición</div>
+                        <div class="position-display">
+                            <div class="position-num" id="position">8</div>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Neumáticos</div>
+                        <div class="stat-value"><span id="tires">100</span>%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="tiresBar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Motor</div>
+                        <div class="stat-value"><span id="motor">100</span>%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="motorBar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Combustible</div>
+                        <div class="stat-value"><span id="fuel">100</span>%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="fuelBar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-box" id="messageBox">
+                <div class="message-item">🏁 ¡Bienvenido a NeonVelocity! Elige tu estrategia.</div>
+            </div>
+
+            <div class="action-selection" id="actionSelection">
+                <div class="action-title">Elige acción:</div>
+                <div class="action-buttons">
+                    <button class="action-btn push" onclick="selectAction(1)">
+                        <span style="font-size: 20px;">🏁</span><br>PUSH<br><span style="font-size: 11px;">Acelera a fondo</span>
+                    </button>
+                    <button class="action-btn maintain" onclick="selectAction(2)">
+                        <span style="font-size: 20px;">⚙️</span><br>MANTENER<br><span style="font-size: 11px;">Ritmo constante</span>
+                    </button>
+                    <button class="action-btn conserve" onclick="selectAction(3)">
+                        <span style="font-size: 20px;">💨</span><br>AHORRAR<br><span style="font-size: 11px;">Conserva energía</span>
+                    </button>
+                    <button class="action-btn pitstop" onclick="selectAction(4)">
+                        <span style="font-size: 20px;">🔧</span><br>BOX<br><span style="font-size: 11px;">Parada técnica</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameOverContent" style="display: none;">
+            <div class="game-over">
+                <h2>❌ DNF - Did Not Finish</h2>
+                <p>El coche se ha averiado en la vuelta <span id="dnfLap">1</span></p>
+            </div>
+            <button class="reset-btn" onclick="resetGame()">🔄 Nueva Carrera</button>
+        </div>
+
+        <div id="finishContent" style="display: none;">
+            <div class="finish-line">
+                <h2>🏁 ¡Bandera a Cuadros!</h2>
+                <p>Posición final: <span class="podium" id="finalPosition">8</span></p>
+                <p id="podiumMessage" style="margin-top: 10px; font-size: 14px;"></p>
+            </div>
+            <button class="reset-btn" onclick="resetGame()">🔄 Nueva Carrera</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            currentLap: 1,
+            totalLaps: 10,
+            position: 8,
+            tires: 100,
+            motor: 100,
+            fuel: 100,
+            gameOver: false,
+            finished: false,
+            dnfLap: null
+        };
+
+        function updateDisplay() {
+            document.getElementById('lapNumber').textContent = gameState.currentLap;
+            document.getElementById('position').textContent = gameState.position;
+            document.getElementById('tires').textContent = gameState.tires;
+            document.getElementById('tiresBar').style.width = Math.max(0, gameState.tires) + '%';
+            document.getElementById('motor').textContent = gameState.motor;
+            document.getElementById('motorBar').style.width = Math.max(0, gameState.motor) + '%';
+            document.getElementById('fuel').textContent = gameState.fuel;
+            document.getElementById('fuelBar').style.width = Math.max(0, gameState.fuel) + '%';
+
+            // Color warnings
+            if (gameState.tires < 30) {
+                document.getElementById('tires').classList.add('warning');
+            } else {
+                document.getElementById('tires').classList.remove('warning');
+            }
+
+            if (gameState.motor < 30) {
+                document.getElementById('motor').classList.add('critical');
+            } else {
+                document.getElementById('motor').classList.remove('critical');
+            }
+
+            if (gameState.fuel < 20) {
+                document.getElementById('fuel').classList.add('warning');
+            } else {
+                document.getElementById('fuel').classList.remove('warning');
+            }
+        }
+
+        function addMessage(message) {
+            const messageBox = document.getElementById('messageBox');
+            const messageItem = document.createElement('div');
+            messageItem.className = 'message-item';
+            messageItem.textContent = message;
+            messageBox.appendChild(messageItem);
+            messageBox.scrollTop = messageBox.scrollHeight;
+        }
+
+        function selectAction(action) {
+            // Disable buttons
+            const buttons = document.querySelectorAll('.action-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            let message = '';
+
+            switch(action) {
+                case 1: // Push
+                    message = '🏁 ¡PUSH! Aceleraste a fondo.';
+                    gameState.position -= 2;
+                    gameState.tires -= 15;
+                    gameState.motor -= 10;
+                    gameState.fuel -= 12;
+                    break;
+                case 2: // Maintain
+                    message = '⚙️  Mantienes el ritmo...';
+                    gameState.tires -= 5;
+                    gameState.motor -= 5;
+                    gameState.fuel -= 8;
+                    break;
+                case 3: // Conserve
+                    message = '💨 Ahorras energía pero pierdes un puesto.';
+                    gameState.position += 1;
+                    gameState.motor += 2;
+                    gameState.fuel -= 4;
+                    break;
+                case 4: // Pit Stop
+                    message = '🔧 Parada técnica completada.';
+                    gameState.position = 19;
+                    gameState.tires = 100;
+                    gameState.motor = 100;
+                    break;
+            }
+
+            addMessage(message);
+
+            // Clamp values
+            gameState.position = Math.max(1, Math.min(20, gameState.position));
+            gameState.tires = Math.max(-10, gameState.tires);
+            gameState.motor = Math.max(-10, gameState.motor);
+            gameState.fuel = Math.max(0, gameState.fuel);
+
+            // Check for random weather
+            if (Math.random() > 0.8) {
+                addMessage('⛈️  ¡Alerta! Empieza a llover en Mónaco.');
+            }
+
+            // Check for DNF
+            if (gameState.tires <= 0 || gameState.motor <= 0) {
+                gameState.gameOver = true;
+                gameState.dnfLap = gameState.currentLap;
+                addMessage('❌ ¡DNF! El coche se ha averiado.');
+                showGameOver();
+                return;
+            }
+
+            updateDisplay();
+
+            // Next lap
+            gameState.currentLap++;
+
+            // Check if race finished
+            if (gameState.currentLap > gameState.totalLaps) {
+                gameState.finished = true;
+                showFinish();
+                return;
+            }
+
+            // Re-enable buttons after delay
+            setTimeout(() => {
+                buttons.forEach(btn => btn.disabled = false);
+            }, 300);
+        }
+
+        function showGameOver() {
+            document.getElementById('gameContent').style.display = 'none';
+            document.getElementById('gameOverContent').style.display = 'block';
+            document.getElementById('dnfLap').textContent = gameState.dnfLap;
+        }
+
+        function showFinish() {
+            document.getElementById('gameContent').style.display = 'none';
+            document.getElementById('finishContent').style.display = 'block';
+            document.getElementById('finalPosition').textContent = gameState.position;
+
+            let podiumMessage = '';
+            if (gameState.position <= 3) {
+                podiumMessage = '🥇 ¡Excelente carrera! ¡Estás en el podio!';
+            } else if (gameState.position <= 10) {
+                podiumMessage = '✅ ¡Buena carrera! Terminaste en puntos.';
+            } else {
+                podiumMessage = '💪 Vuelve a intentarlo.';
+            }
+            document.getElementById('podiumMessage').textContent = podiumMessage;
+        }
+
+        function resetGame() {
+            gameState = {
+                currentLap: 1,
+                totalLaps: 10,
+                position: 8,
+                tires: 100,
+                motor: 100,
+                fuel: 100,
+                gameOver: false,
+                finished: false,
+                dnfLap: null
+            };
+
+            document.getElementById('gameContent').style.display = 'block';
+            document.getElementById('gameOverContent').style.display = 'none';
+            document.getElementById('finishContent').style.display = 'none';
+
+            document.getElementById('messageBox').innerHTML = '<div class="message-item">🏁 ¡Bienvenido a NeonVelocity! Elige tu estrategia.</div>';
+
+            const buttons = document.querySelectorAll('.action-btn');
+            buttons.forEach(btn => btn.disabled = false);
+
+            updateDisplay();
+        }
+
+        // Initialize
+        updateDisplay();
+    </script>
+</body>
+</html>
